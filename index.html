@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>OpenAI Models — 2018–2026</title>
+<style>
+:root{
+  --paper:#f7f6f2;
+  --ink:#11110f;
+  --muted:#6b6962;
+  --rule:#cfccc2;
+  --faint:#e8e6df;
+  --soft:#eeece6;
+  --green:#0a6d52;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  font-size:14px;line-height:1.45;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit;text-underline-offset:3px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+.wrap{width:min(1480px,calc(100% - 48px));margin:0 auto}
+header{border-bottom:1px solid var(--ink);padding:24px 0 30px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;color:var(--muted);font:11px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.06em}
+.status{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:block;flex:none}
+h1{margin:44px 0 10px;font-size:clamp(48px,7vw,104px);font-weight:610;letter-spacing:-.06em;line-height:.88}
+.lede{margin:0;max-width:760px;font-size:clamp(17px,1.7vw,24px);line-height:1.35;letter-spacing:-.018em}
+section{padding:42px 0 48px;border-bottom:1px solid var(--ink)}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:18px}
+.section-title{margin:0;font-size:clamp(25px,3vw,42px);line-height:1;letter-spacing:-.04em;font-weight:590}
+.section-note{margin:0;max-width:640px;text-align:right;color:var(--muted);font-size:12px}
+.controls{display:flex;align-items:center;gap:6px;margin-bottom:12px;min-height:34px}
+.filter-btn,.text-btn{
+  appearance:none;border:1px solid var(--ink);background:transparent;border-radius:999px;
+  padding:7px 10px;font-size:12px;line-height:1;
+}
+.filter-btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.text-btn{border-color:var(--rule);color:var(--muted)}
+.text-btn:hover,.text-btn:focus-visible{border-color:var(--ink);color:var(--ink)}
+.search{margin-left:auto;width:min(320px,34vw);border-bottom:1px solid var(--ink)}
+.search input{width:100%;border:0;background:transparent;outline:none;padding:7px 1px;font-size:12px}
+.count{min-width:76px;text-align:right;color:var(--muted);font:11px ui-monospace,SFMono-Regular,Menlo,monospace}
+.legend{display:flex;gap:14px;align-items:center;color:var(--muted);font-size:11px;margin:0 0 10px}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.lineage-shell,.matrix-shell,.compare-shell{overflow:auto;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);overscroll-behavior-inline:contain}
+.lineage-grid{
+  display:grid;grid-template-columns:repeat(9,minmax(145px,1fr));align-items:start;
+  width:100%;min-width:1305px;
+}
+.year-column{border-right:1px solid var(--rule);padding:0 8px 10px;min-height:100%}
+.year-column:last-child{border-right:0}
+.year-head{
+  position:sticky;top:0;z-index:3;background:var(--paper);border-bottom:1px solid var(--ink);
+  margin:0 -8px 8px;padding:9px 8px;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);
+}
+.model-chip{
+  width:100%;display:block;position:relative;text-align:left;background:transparent;border:1px solid var(--rule);
+  padding:8px 9px 8px 19px;margin:0 0 6px;border-radius:0;line-height:1.2;
+}
+.model-chip:last-child{margin-bottom:0}
+.model-chip:hover,.model-chip:focus-visible{border-color:var(--ink);outline:none}
+.model-chip.pinned{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.model-chip .dot{position:absolute;left:8px;top:11px;width:6px;height:6px;border-radius:50%;border:1px solid currentColor;background:transparent}
+.model-chip.current:not(.pinned) .dot{background:var(--green);border-color:var(--green)}
+.model-chip.pinned .dot{background:var(--paper);border-color:var(--paper)}
+.model-name{font-size:12px;font-weight:590;letter-spacing:-.01em;overflow-wrap:anywhere}
+.model-chip:not(.major) .model-name{font-weight:500}
+.model-meta{display:flex;justify-content:space-between;gap:8px;margin-top:3px;color:var(--muted);font:9px ui-monospace,SFMono-Regular,Menlo,monospace}
+.model-chip.pinned .model-meta{color:#d7d4cc}
+.model-variants{white-space:nowrap}
+.empty{color:#b5b2aa;font:10px ui-monospace,SFMono-Regular,Menlo,monospace;padding:5px 1px}
+.compare-shell{background:rgba(255,255,255,.08)}
+.compare{border-collapse:collapse;width:100%;min-width:820px;table-layout:fixed}
+.compare th,.compare td{padding:11px 12px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);vertical-align:top;text-align:left}
+.compare tr:last-child th,.compare tr:last-child td{border-bottom:0}
+.compare th:first-child{width:130px;color:var(--muted);font:10px ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:400;background:var(--paper);position:sticky;left:0;z-index:2}
+.compare td:last-child,.compare th:last-child{border-right:0}
+.model-head{position:relative;min-height:54px;padding-right:24px}
+.model-head strong{display:block;font-size:18px;line-height:1.05;letter-spacing:-.025em}
+.model-head .meta{margin-top:5px;color:var(--muted);font:9px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace}
+.unpin{position:absolute;right:0;top:0;border:0;background:transparent;padding:0;color:var(--muted);font-size:17px;line-height:1}
+.cap-list{display:flex;flex-wrap:wrap;gap:4px}
+.cap-tag{border:1px solid var(--rule);padding:2px 4px;white-space:nowrap;font:9px ui-monospace,SFMono-Regular,Menlo,monospace}
+.story{font-size:12px;line-height:1.45}
+.source-link{font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
+.compare-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;color:var(--muted);font-size:11px}
+.matrix-shell{max-height:620px}
+.matrix{border-collapse:separate;border-spacing:0;width:100%;min-width:990px}
+.matrix th,.matrix td{border-bottom:1px solid var(--faint);padding:7px 8px;text-align:center;font-size:11px;height:34px}
+.matrix thead th{position:sticky;top:0;z-index:3;background:var(--paper);border-bottom:1px solid var(--ink);font:9px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);font-weight:400;white-space:normal}
+.matrix thead th:first-child{left:0;z-index:5;text-align:left;width:205px}
+.matrix tbody th{position:sticky;left:0;z-index:2;background:var(--paper);text-align:left;font-weight:530;white-space:nowrap;cursor:pointer}
+.matrix tbody tr:hover th,.matrix tbody tr:hover td{background:var(--soft)}
+.matrix .date{display:block;color:var(--muted);font:8px ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:1px}
+.mark-full{font-size:12px}
+.mark-partial{font-size:14px;color:var(--muted)}
+details.method{padding:0}
+details.method>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:16px 0;font-size:14px;font-weight:580}
+details.method>summary::-webkit-details-marker{display:none}
+details.method>summary::after{content:"+";font-size:18px;font-weight:400}
+details.method[open]>summary::after{content:"−"}
+.method-body{max-width:820px;padding:0 0 22px;color:var(--muted);font-size:12px;line-height:1.55}
+.method-body p{margin:0 0 10px}
+footer{padding:20px 0 36px;color:var(--muted);font:10px ui-monospace,SFMono-Regular,Menlo,monospace}
+@media(max-width:820px){
+  .wrap{width:min(100% - 30px,1480px)}
+  header{padding:18px 0 24px}.top{align-items:flex-start;flex-direction:column;gap:6px}
+  h1{margin-top:34px;font-size:56px}.lede{font-size:18px}
+  section{padding:34px 0 38px}.section-head{display:block}.section-note{text-align:left;margin-top:8px;max-width:620px}
+  .controls{flex-wrap:wrap}.search{order:5;width:100%;margin-left:0}.count{margin-left:auto}
+  .compare-actions{align-items:flex-start}.compare-actions span{max-width:240px}
+}
+@media(max-width:520px){
+  .wrap{width:calc(100% - 28px)}h1{font-size:48px}.lede{font-size:17px}
+  .section-title{font-size:30px}.filter-btn{padding:7px 9px}
+  .lineage-grid{display:block;width:100%;min-width:0}
+  .year-column{border-right:0;border-bottom:1px solid var(--rule);padding:0 0 9px;min-height:0}
+  .year-column:last-child{border-bottom:0}
+  .year-head{position:static;margin:0 0 7px;padding:8px 0 6px}
+  .model-chip{padding:8px 8px 8px 18px;margin-bottom:5px}
+  .model-chip .dot{left:8px;top:11px}.model-name{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <span>OpenAI models · 2018–2026</span>
+      <span class="status"><i class="status-dot"></i>Public record through 10 Sep 2026</span>
+    </div>
+    <h1>OpenAI models</h1>
+    <p class="lede">Every publicly documented language-model family, arranged by when it appeared and what kind of model it was. Click any model to compare it.</p>
+  </div>
+</header>
+<main>
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">Lineage</h2>
+      <p class="section-note">Models are grouped by release year and ordered by date. Each model shows its public role. A green dot means current.</p>
+    </div>
+    <div class="controls" role="toolbar" aria-label="Filter models">
+      <button class="filter-btn" data-filter="all" aria-pressed="true">All</button>
+      <button class="filter-btn" data-filter="major" aria-pressed="false">Milestones</button>
+      <button class="filter-btn" data-filter="current" aria-pressed="false">Current</button>
+      <div class="search"><input id="search" aria-label="Search models" placeholder="Search models or variants" autocomplete="off" /></div>
+      <div class="count" id="visibleCount"></div>
+    </div>
+    <div class="lineage-shell" id="lineageShell">
+      <div class="lineage-grid" id="lineageGrid" aria-label="OpenAI language model lineage by year and role"></div>
+    </div>
+  </div>
+</section>
+<section id="compareSection">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">Compare</h2>
+      <p class="section-note">Up to four models. A fifth click replaces the oldest selection.</p>
+    </div>
+    <div class="compare-actions"><span id="compareHelp">Click a model above to add or remove it.</span><button class="text-btn" id="resetPins">Reset</button></div>
+    <div class="compare-shell"><table class="compare" id="compareTable" aria-label="Selected OpenAI model comparison"></table></div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">Capabilities</h2>
+      <p class="section-note">● documented · ○ partial or staged · blank means not marked, not impossible.</p>
+    </div>
+    <div class="matrix-shell"><table class="matrix" id="matrix" aria-label="OpenAI model capability matrix"></table></div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <details class="method">
+      <summary>Scope & method</summary>
+      <div class="method-body">
+        <p>Includes publicly documented OpenAI generative language-model families and materially distinct public variants. Dated API snapshots and simple aliases are collapsed into their families. Embedding, moderation, image/video-only, transcription-only and TTS-only models are excluded.</p>
+        <p>Role rows describe public positioning, not unpublished checkpoint ancestry. Capability marks and technical details use public documentation; unknowns stay unknown. Each selected model links to its primary source in the comparison.</p>
+      </div>
+    </details>
+  </div>
+</section>
+</main>
+<footer class="wrap">OpenAI models · independent research visualization</footer>
+<script>
+const U = {
+  gpt1:'https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf',
+  gpt2:'https://openai.com/index/better-language-models/',
+  gpt3:'https://openai.com/index/language-models-are-few-shot-learners/',
+  codexPaper:'https://arxiv.org/abs/2107.03374',
+  instruct:'https://openai.com/index/instruction-following/',
+  chatgpt:'https://openai.com/index/chatgpt/',
+  gpt4:'https://openai.com/index/gpt-4-research/',
+  devday:'https://openai.com/index/new-models-and-developer-products-announced-at-devday/',
+  gpt4o:'https://openai.com/index/hello-gpt-4o/',
+  gpt4omini:'https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/',
+  realtime:'https://openai.com/index/introducing-the-realtime-api/',
+  o1:'https://openai.com/index/introducing-openai-o1-preview/',
+  o3mini:'https://openai.com/index/openai-o3-mini/',
+  agents:'https://openai.com/index/new-tools-for-building-agents/',
+  gpt45:'https://openai.com/index/introducing-gpt-4-5/',
+  gpt41:'https://openai.com/index/gpt-4-1/',
+  o3o4:'https://openai.com/index/introducing-o3-and-o4-mini/',
+  codex:'https://openai.com/index/introducing-codex/',
+  gptoss:'https://openai.com/index/introducing-gpt-oss/',
+  gpt5:'https://openai.com/index/introducing-gpt-5/',
+  gpt5dev:'https://openai.com/index/introducing-gpt-5-for-developers/',
+  gpt51:'https://openai.com/index/gpt-5-1-for-developers/',
+  gpt52:'https://openai.com/index/introducing-gpt-5-2/',
+  gpt53:'https://openai.com/index/introducing-gpt-5-3-codex/',
+  spark:'https://openai.com/index/introducing-gpt-5-3-codex-spark/',
+  gpt54:'https://openai.com/index/introducing-gpt-5-4/',
+  gpt55:'https://openai.com/index/introducing-gpt-5-5/',
+  rt2:'https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api/',
+  live:'https://openai.com/index/introducing-gpt-live/',
+  gpt56:'https://openai.com/index/gpt-5-6/',
+  astra:'https://openai.com/index/gpt-6-astra/',
+  models:'https://developers.openai.com/api/docs/models'
+};
+const models = [
+ {id:'gpt1',name:'GPT‑1',date:'2018-06-11',dateLabel:'Jun 2018',lane:'foundation',major:true,current:false,context:512,maxOut:null,params:'≈117M',price:null,variants:['Improving Language Understanding by Generative Pre-Training'],caps:{},role:'Pretrained language model',change:'Established generative pretraining followed by discriminative fine-tuning as a reusable language-understanding recipe.',evidence:'12-layer Transformer decoder; 768 hidden; sequence length 512.',source:U.gpt1},
+ {id:'gpt2',name:'GPT‑2',date:'2019-02-14',dateLabel:'Feb 2019',lane:'foundation',major:true,current:false,context:1024,maxOut:null,params:'124M → 1.5B',price:null,variants:['124M','355M','774M','1.5B'],caps:{ctx:false},role:'Scaled pretrained language model',change:'Made zero-shot task behavior and coherent long-form generation visible as a consequence of scale and broad web pretraining.',evidence:'Largest public model: 1.5B parameters; trained on WebText.',source:U.gpt2},
+ {id:'gpt3',name:'GPT‑3',date:'2020-05-28',dateLabel:'May 2020',lane:'foundation',major:true,current:false,context:2048,maxOut:null,params:'175B',price:null,variants:['Ada','Babbage','Curie','Davinci'],caps:{ctx:true},role:'Few-shot general language model',change:'Turned the prompt itself into a learning surface: zero-, one- and few-shot task specification without gradient updates.',evidence:'175B parameters; task-agnostic few-shot evaluation became the defining demonstration.',source:U.gpt3},
+ {id:'codex0',name:'Codex',date:'2021-07-07',dateLabel:'Jul 2021',lane:'specialist',major:true,current:false,context:null,maxOut:null,params:'≤12B in paper',price:null,variants:['code-cushman-001/002','code-davinci-001/002'],caps:{ctx:true,tools:'partial'},role:'Code-specialized GPT',change:'Created the first major specialist branch: a GPT model fine-tuned on public code, translating natural language into executable programs.',evidence:'Codex paper reports models up to 12B and 28.8% pass@1 on HumanEval for Codex-12B.',source:U.codexPaper},
+ {id:'instruct',name:'InstructGPT',date:'2022-01-27',dateLabel:'Jan 2022',lane:'aligned',major:true,current:false,context:2048,maxOut:null,params:'1.3B / 6B / 175B study',price:null,variants:['text-ada-001','text-babbage-001','text-curie-001','text-davinci-001','text-davinci-002','text-davinci-003'],caps:{ctx:true,aligned:true},role:'Human-preference-aligned GPT',change:'Shifted optimization from “predict plausible text” toward “follow the user’s intent” using demonstrations, preference data and RLHF.',evidence:'OpenAI reported that a 1.3B InstructGPT model was preferred to 175B GPT‑3 on its human evaluations.',source:U.instruct},
+ {id:'gpt35',name:'GPT‑3.5 series',date:'2022-03-01',dateLabel:'early 2022',lane:'aligned',major:false,current:false,context:4096,maxOut:null,params:'not disclosed',price:null,variants:['GPT‑3.5','text-davinci-002/003 family lineage'],caps:{ctx:true,aligned:true},role:'Post-training bridge',change:'The training series that became the substrate for the original ChatGPT experience, bridging instruction-following GPT‑3 and chat-native products.',evidence:'OpenAI says the GPT‑3.5 series finished training in early 2022.',source:U.chatgpt},
+ {id:'chatgpt',name:'ChatGPT · GPT‑3.5',date:'2022-11-30',dateLabel:'Nov 2022',lane:'aligned',major:true,current:false,context:null,maxOut:null,params:'not disclosed',price:null,variants:['Original ChatGPT research preview'],caps:{ctx:true,aligned:true,dialogue:true},role:'Dialogue-optimized assistant',change:'Made conversation, turn history, refusal behavior and iterative correction the default human interface to a language model.',evidence:'Launched as a sibling of InstructGPT, trained with RLHF and optimized for dialogue.',source:U.chatgpt},
+ {id:'gpt35turbo',name:'GPT‑3.5 Turbo',date:'2023-03-01',dateLabel:'Mar 2023',lane:'aligned',major:false,current:false,context:16385,maxOut:4096,params:'not disclosed',price:'$0.50 / $1.50 per MTok (legacy doc)',variants:['gpt-3.5-turbo','gpt-3.5-turbo-16k','gpt-3.5-turbo-instruct'],caps:{ctx:true,aligned:true,dialogue:true},role:'API chat workhorse',change:'Turned chat optimization into a durable API model family and eventually expanded the context window to ~16K.',evidence:'Legacy documentation lists a 16,385-token context window for gpt-3.5-turbo.',source:'https://developers.openai.com/api/docs/models/gpt-3.5-turbo'},
+ {id:'gpt4',name:'GPT‑4',date:'2023-03-14',dateLabel:'Mar 2023',lane:'multimodal',major:true,current:false,context:8192,maxOut:null,params:'not disclosed',price:null,variants:['GPT‑4 8K','GPT‑4 32K','GPT‑4V / Vision Preview'],caps:{ctx:true,aligned:true,dialogue:true,vision:true},role:'Large multimodal model',change:'Made image input and much stronger reliability/capability part of the frontier model definition while ending public model-size disclosure.',evidence:'OpenAI reported GPT‑4 around the top 10% of simulated bar-exam takers versus GPT‑3.5 around the bottom 10%.',source:U.gpt4},
+ {id:'gpt4turbo',name:'GPT‑4 Turbo',date:'2023-11-06',dateLabel:'Nov 2023',lane:'multimodal',major:false,current:false,context:128000,maxOut:4096,params:'not disclosed',price:'$10 / $30 per MTok',variants:['gpt-4-1106-preview','gpt-4-0125-preview','gpt-4-turbo'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,tools:true},role:'Long-context GPT‑4',change:'Compressed cost while stretching context to 128K and turning function calling / structured developer control into a core API concern.',evidence:'DevDay introduced 128K context plus improved function calling and lower prices.',source:U.devday},
+ {id:'gpt4o',name:'GPT‑4o',date:'2024-05-13',dateLabel:'May 2024',lane:'multimodal',major:true,current:false,context:128000,maxOut:16384,params:'not disclosed',price:'$2.50 / $10 per MTok (legacy doc)',variants:['gpt-4o','chatgpt-4o-latest','GPT‑4o Audio variants'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,audio:'partial',tools:true},role:'Native omni model',change:'Collapsed text, vision and audio research into a single end-to-end model instead of a speech-recognition → LLM → speech-synthesis pipeline.',evidence:'Launch: 320 ms average audio response, 232 ms fastest; text/code matched GPT‑4 Turbo while multilingual, vision and audio improved.',source:U.gpt4o},
+ {id:'gpt4omini',name:'GPT‑4o mini',date:'2024-07-18',dateLabel:'Jul 2024',lane:'multimodal',major:false,current:false,context:128000,maxOut:16384,params:'not disclosed',price:'$0.15 / $0.60 per MTok',variants:['gpt-4o-mini'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,tools:true},role:'Small multimodal GPT',change:'Brought multimodal general-purpose capability below the price of GPT‑3.5 Turbo and replaced it as the small default in ChatGPT.',evidence:'Launch: 82% MMLU; $0.15 input and $0.60 output per million tokens.',source:U.gpt4omini},
+ {id:'o1preview',name:'o1‑preview / o1‑mini',date:'2024-09-12',dateLabel:'Sep 2024',lane:'reasoning',major:true,current:false,context:128000,maxOut:32768,params:'not disclosed',price:'o1-preview: $15 / $60 per MTok',variants:['o1-preview','o1-mini'],caps:{ctx:true,aligned:true,dialogue:true,reasoning:true},role:'First public o‑series reasoning family',change:'Made inference-time deliberation explicit: the model could spend more hidden reasoning compute before producing an answer.',evidence:'OpenAI introduced the o1 series as reinforcement-learned models that “think before they answer.”',source:U.o1},
+ {id:'realtime4o',name:'GPT‑4o Realtime',date:'2024-10-01',dateLabel:'Oct 2024',lane:'voice',major:false,current:false,context:null,maxOut:null,params:'not disclosed',price:null,variants:['gpt-4o-realtime-preview','gpt-4o-mini-realtime-preview','gpt-4o-audio-preview','gpt-4o-mini-audio-preview'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,audio:true,tools:true},role:'Speech-to-speech GPT‑4o',change:'Exposed native low-latency speech-to-speech and audio generation as an API surface instead of only a ChatGPT product experience.',evidence:'Realtime API beta enabled speech-to-speech conversations with GPT‑4o without a separate transcription/synthesis chain.',source:U.realtime},
+ {id:'o1',name:'o1 / o1‑pro',date:'2024-12-05',dateLabel:'Dec 2024',lane:'reasoning',major:false,current:false,context:200000,maxOut:100000,params:'not disclosed',price:'o1: $15 / $60; o1-pro: $150 / $600 per MTok',variants:['o1','o1-pro'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true},role:'Full reasoning model',change:'Turned reasoning effort into a persistent model property; the pro variant explicitly exchanged much more inference compute for reliability.',evidence:'Current legacy docs list 200K context / 100K max output for o1; o1-pro uses more compute.',source:'https://developers.openai.com/api/docs/models/o1'},
+ {id:'o3mini',name:'o3‑mini',date:'2025-01-31',dateLabel:'Jan 2025',lane:'reasoning',major:false,current:false,context:200000,maxOut:100000,params:'not disclosed',price:'$1.10 / $4.40 per MTok',variants:['o3-mini'],caps:{ctx:true,aligned:true,dialogue:true,reasoning:true,tools:true},role:'Small developer reasoning model',change:'Combined low-cost reasoning with structured outputs, function calling and developer messages, making reasoning easier to operationalize.',evidence:'200K context / 100K output; same cost target as o1-mini.',source:U.o3mini},
+ {id:'computer',name:'computer‑use‑preview',date:'2025-03-11',dateLabel:'Mar 2025',lane:'specialist',major:true,current:false,context:8192,maxOut:1024,params:'not disclosed',price:'$3 / $12 per MTok',variants:['computer-use-preview'],caps:{ctx:true,aligned:true,vision:true,reasoning:true,tools:true,computer:true},role:'GUI action specialist',change:'Promoted visual computer interaction from an application wrapper into a purpose-built model/API capability.',evidence:'Model docs list image input, reasoning and computer-use specialization.',source:U.agents},
+ {id:'gpt45',name:'GPT‑4.5',date:'2025-02-27',dateLabel:'Feb 2025',lane:'foundation',major:true,current:false,context:128000,maxOut:16384,params:'not disclosed',price:'$75 / $150 per MTok at launch',variants:['gpt-4.5-preview'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,tools:true},role:'Scaled unsupervised GPT',change:'A deliberate return to scaling unsupervised learning rather than explicit chain-of-thought reasoning, separating two paths to capability.',evidence:'OpenAI called it its strongest GPT model at preview launch and explicitly contrasted unsupervised scaling with reasoning models.',source:U.gpt45},
+ {id:'gpt41',name:'GPT‑4.1 family',date:'2025-04-14',dateLabel:'Apr 2025',lane:'multimodal',major:true,current:false,context:1047576,maxOut:32768,params:'not disclosed',price:'4.1: $2 / $8 per MTok',variants:['GPT‑4.1','GPT‑4.1 mini','GPT‑4.1 nano'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,tools:true},role:'Long-context developer GPT',change:'Made a ~1M-token context window practical while sharply improving coding and instruction following; introduced the first GPT nano tier.',evidence:'Launch: GPT‑4.1 scored 54.6% on SWE-bench Verified and supported up to one million tokens of context.',source:U.gpt41},
+ {id:'o3o4',name:'o3 / o4‑mini',date:'2025-04-16',dateLabel:'Apr 2025',lane:'reasoning',major:true,current:false,context:200000,maxOut:100000,params:'not disclosed',price:null,variants:['o3','o4-mini','o3-pro (Jun 2025)'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true},role:'Tool-using reasoning family',change:'Reasoning stopped being sealed inside text: o3 and o4-mini could reason with images and call web, Python, file and other tools inside their problem-solving loop.',evidence:'OpenAI described this launch as a move “toward agentic tool use” and said future models would converge GPT and o-series strengths.',source:U.o3o4},
+ {id:'codex1',name:'Codex agent models',date:'2025-05-16',dateLabel:'May 2025',lane:'specialist',major:true,current:false,context:null,maxOut:null,params:'not disclosed',price:'codex-mini-latest: $1.50 / $6 per MTok at launch',variants:['codex-1','codex-mini-latest'],caps:{ctx:true,aligned:true,reasoning:true,tools:true,computer:'partial'},role:'Agentic software engineering',change:'Recast code generation as delegated repository work: inspect, edit, test and return a patch rather than only emit code in chat.',evidence:'codex-mini-latest was described as a version of o4-mini optimized for Codex.',source:U.codex},
+ {id:'deepresearch',name:'Deep‑research models',date:'2025-06-26',dateLabel:'2025',lane:'specialist',major:false,current:false,context:200000,maxOut:100000,params:'not disclosed',price:'o3-deep-research: $10 / $40 per MTok',variants:['o3-deep-research','o4-mini-deep-research'],caps:{ctx:true,aligned:true,reasoning:true,tools:true,web:true},role:'Long-horizon research specialist',change:'Bundled reasoning, web search and source synthesis into models explicitly optimized for multi-step research over external information.',evidence:'The API model was documented as able to search and synthesize the internet and connected data.',source:'https://developers.openai.com/api/docs/models/o3-deep-research'},
+ {id:'gptoss',name:'gpt‑oss',date:'2025-08-05',dateLabel:'Aug 2025',lane:'open',major:true,current:true,context:131072,maxOut:null,params:'20B / 120B',price:'open weights',variants:['gpt-oss-20b','gpt-oss-120b'],caps:{ctx:true,aligned:true,reasoning:true,tools:true,open:true},role:'Open-weight reasoning models',change:'Reopened model internals to developers under Apache 2.0 while preserving reasoning-effort controls and tool-oriented behavior.',evidence:'20B and 120B open-weight models; Apache 2.0; full chain-of-thought available to developers.',source:U.gptoss},
+ {id:'gpt5',name:'GPT‑5 family',date:'2025-08-07',dateLabel:'Aug 2025',lane:'agent',major:true,current:false,context:400000,maxOut:128000,params:'not disclosed',price:'GPT‑5: $1.25 / $10 per MTok',variants:['GPT‑5','GPT‑5 mini','GPT‑5 nano','GPT‑5 Pro'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true},role:'Unified routed GPT + reasoning system',change:'OpenAI explicitly reunified fast answering and deeper reasoning behind a router, absorbing the GPT/o-series split into one system.',evidence:'Developer launch: 74.9% SWE-bench Verified; GPT‑5 API supported 400K context and 128K max output.',source:U.gpt5},
+ {id:'gptrealtime',name:'gpt‑realtime',date:'2025-08-28',dateLabel:'Aug 2025',lane:'voice',major:false,current:false,context:null,maxOut:null,params:'not disclosed',price:null,variants:['gpt-realtime','gpt-audio'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,audio:true,tools:true},role:'Production speech-to-speech model',change:'Moved the realtime voice stack from preview toward a production voice-agent model with instruction following, tools and multimodal input.',evidence:'Launch added image input, MCP and SIP support to speech-to-speech workflows.',source:'https://openai.com/index/introducing-gpt-realtime/'},
+ {id:'gpt5codex',name:'GPT‑5‑Codex',date:'2025-09-15',dateLabel:'Sep 2025',lane:'specialist',major:false,current:false,context:400000,maxOut:128000,params:'not disclosed',price:null,variants:['gpt-5-codex'],caps:{ctx:true,aligned:true,vision:true,reasoning:true,tools:true,computer:'partial'},role:'GPT‑5 for agentic coding',change:'Specialized GPT‑5 for long, interactive software-engineering trajectories rather than one-shot code generation.',evidence:'OpenAI described it as GPT‑5 optimized for agentic software engineering.',source:'https://openai.com/index/introducing-upgrades-to-codex/'},
+ {id:'gpt51',name:'GPT‑5.1 family',date:'2025-11-13',dateLabel:'Nov 2025',lane:'agent',major:false,current:false,context:400000,maxOut:128000,params:'not disclosed',price:'$1.25 / $10 per MTok (base)',variants:['GPT‑5.1','GPT‑5.1 Chat','GPT‑5.1‑Codex','GPT‑5.1‑Codex mini','GPT‑5.1‑Codex‑Max'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true},role:'Adaptive reasoning GPT',change:'Made reasoning time itself adaptive to task difficulty and added a no-reasoning mode, narrowing the boundary between “instant” and “thinking.”',evidence:'Launch emphasized adaptive reasoning plus shell and apply_patch tools.',source:U.gpt51},
+ {id:'gpt52',name:'GPT‑5.2 family',date:'2025-12-11',dateLabel:'Dec 2025',lane:'agent',major:true,current:false,context:400000,maxOut:128000,params:'not disclosed',price:'$1.75 / $14 per MTok (base)',variants:['GPT‑5.2','GPT‑5.2 Pro','GPT‑5.2 Chat'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true},role:'Professional-work / long-agent model',change:'Shifted the frontier narrative from benchmark problem solving toward economically valuable knowledge work and long-running agents.',evidence:'OpenAI launched GPT‑5.2 around professional work, long context, tool calling and long-running agents.',source:U.gpt52},
+ {id:'gpt52codex',name:'GPT‑5.2‑Codex',date:'2025-12-18',dateLabel:'Dec 2025',lane:'specialist',major:false,current:false,context:400000,maxOut:128000,params:'not disclosed',price:null,variants:['GPT‑5.2‑Codex'],caps:{ctx:true,aligned:true,vision:true,reasoning:true,tools:true,computer:true},role:'Long-horizon coding agent',change:'Extended Codex toward large refactors, migrations and longer autonomous work, with context compaction and stronger computer interaction.',evidence:'Launch emphasized long-horizon software tasks and context compaction.',source:'https://openai.com/index/introducing-gpt-5-2-codex/'},
+ {id:'gpt53codex',name:'GPT‑5.3‑Codex',date:'2026-02-05',dateLabel:'Feb 2026',lane:'specialist',major:true,current:true,context:400000,maxOut:128000,params:'not disclosed',price:'$1.75 / $14 per MTok',variants:['GPT‑5.3‑Codex'],caps:{ctx:true,aligned:true,vision:true,reasoning:true,tools:true,web:true,computer:true},role:'General computer-working coding agent',change:'Recombined Codex’s coding frontier with GPT‑5.2 reasoning and professional knowledge, moving the coding agent toward general work on a computer.',evidence:'Launch: 56.8 SWE-Bench Pro, 77.3 Terminal-Bench 2.0, 64.7 OSWorld Verified; ~25% faster than predecessor.',source:U.gpt53},
+ {id:'spark',name:'GPT‑5.3‑Codex‑Spark',date:'2026-02-12',dateLabel:'Feb 2026',lane:'specialist',major:false,current:true,context:128000,maxOut:null,params:'not disclosed',price:null,variants:['GPT‑5.3‑Codex‑Spark'],caps:{ctx:true,aligned:true,reasoning:true,tools:true},role:'Ultra-low-latency coding model',change:'Created a latency-first specialist branch intended for steering code in real time rather than waiting for a long agent turn.',evidence:'Research preview served on Cerebras at more than 1,000 tokens per second.',source:U.spark},
+ {id:'gpt53instant',name:'GPT‑5.3 Instant',date:'2026-03-03',dateLabel:'Mar 2026',lane:'aligned',major:false,current:false,context:128000,maxOut:16384,params:'not disclosed',price:null,variants:['gpt-5.3-chat-latest'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,tools:true,web:true},role:'Conversational instant model',change:'Separated conversational quality and fast web-grounded answers from the long-horizon agent line, preserving an “instant” interaction mode.',evidence:'ChatGPT release focused on smoother responses, richer web results and fewer unnecessary dead ends.',source:'https://openai.com/index/gpt-5-3-instant/'},
+ {id:'gpt54',name:'GPT‑5.4 family',date:'2026-03-05',dateLabel:'Mar 2026',lane:'agent',major:true,current:true,context:1050000,maxOut:128000,params:'not disclosed',price:'GPT‑5.4: $2.50 / $15 per MTok',variants:['GPT‑5.4','GPT‑5.4 Pro','GPT‑5.4 mini','GPT‑5.4 nano'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true,computer:true},role:'General agent + computer-use family',change:'Folded the strongest Codex-style coding/agent behavior into the general-purpose line and expanded context to about 1.05M tokens.',evidence:'The family spans flagship, Pro, mini and nano tiers; general-purpose computer use becomes a first-class capability.',source:U.gpt54},
+ {id:'gpt55',name:'GPT‑5.5 family',date:'2026-04-23',dateLabel:'Apr 2026',lane:'agent',major:true,current:true,context:1050000,maxOut:128000,params:'not disclosed',price:'GPT‑5.5: $5 / $30 per MTok',variants:['GPT‑5.5','GPT‑5.5 Pro','GPT‑5.5 Instant Mini'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true,computer:true},role:'End-to-end professional-work model',change:'Optimized explicitly for messy, multi-part work where the model must plan, use tools, check results and continue across coding, research and computer tasks.',evidence:'Launch: 82.7% Terminal-Bench 2.0, 58.6% SWE-Bench Pro, 78.7% OSWorld; figures are launch-era and not cross-era normalized.',source:U.gpt55},
+ {id:'rt2',name:'GPT‑Realtime‑2',date:'2026-05-07',dateLabel:'May 2026',lane:'voice',major:true,current:true,context:128000,maxOut:32000,params:'not disclosed',price:'text: $4 / $24 per MTok; audio priced separately',variants:['GPT‑Realtime‑2','GPT‑Realtime‑Translate','GPT‑Realtime‑Whisper (transcription sibling)'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,audio:true,reasoning:true,tools:true},role:'Voice model with GPT‑5-class reasoning',change:'Brought explicit reasoning and reliable tool use into realtime speech-to-speech, so voice agents could handle harder work while the conversation continued.',evidence:'OpenAI called it its first voice model with GPT‑5‑class reasoning.',source:U.rt2},
+ {id:'rt21',name:'GPT‑Realtime‑2.1',date:'2026-07-06',dateLabel:'Jul 2026',lane:'voice',major:false,current:true,context:128000,maxOut:32000,params:'not disclosed',price:'text: $4 / $24 per MTok (2.1)',variants:['gpt-realtime-2.1','gpt-realtime-2.1-mini'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,audio:true,reasoning:true,tools:true},role:'Refined realtime reasoning family',change:'Improved interruption, silence/noise handling and alphanumeric recognition while adding a smaller lower-cost realtime reasoning tier.',evidence:'Released July 2026 as 2.1 and 2.1-mini; p95 latency improvements were announced across realtime voice models.',source:'https://developers.openai.com/api/docs/models/gpt-realtime-2'},
+ {id:'live1',name:'GPT‑Live‑1 family',date:'2026-07-08',dateLabel:'Jul 2026',lane:'voice',major:true,current:true,context:null,maxOut:null,params:'not disclosed',price:null,variants:['GPT‑Live‑1','GPT‑Live‑1 mini'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,audio:true,tools:true,web:true,duplex:true},role:'Full-duplex conversational voice',change:'Changed turn-taking itself: the model can listen and speak at the same time, follow pauses and interruptions, and decide when to keep listening.',evidence:'OpenAI describes GPT‑Live as full duplex; ChatGPT Voice uses GPT‑Live‑1 on paid plans and mini on Free.',source:U.live},
+ {id:'gpt56',name:'GPT‑5.6 family',date:'2026-07-09',dateLabel:'Jul 2026',lane:'agent',major:true,current:true,context:1050000,maxOut:128000,params:'not disclosed',price:'Luna $0.20/$1.20 · Terra $2/$12 · Sol $4/$20 per MTok (current)',variants:['GPT‑5.6 Sol','GPT‑5.6 Terra','GPT‑5.6 Luna'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true,computer:true},role:'Durable capability tiers',change:'Replaced size-suffix naming with role-like tiers: Sol for frontier capability, Terra for balance, Luna for high-volume efficiency, all sharing the same large context/tool envelope.',evidence:'Current docs: 1.05M context / 128K output for all three; Sol $4/$20, Terra $2/$12, Luna $0.20/$1.20 per MTok.',source:U.gpt56},
+ {id:'cyber56',name:'GPT‑5.6 Cyber',date:'2026-07-30',dateLabel:'Jul 2026',lane:'specialist',major:false,current:true,context:null,maxOut:null,params:'not disclosed',price:null,variants:['GPT‑5.6 Cyber','Daybreak aliases'],caps:{ctx:true,aligned:true,vision:true,reasoning:true,tools:true,web:true,computer:true},role:'Authorized cybersecurity specialist',change:'Shows the family splitting by deployment/safety envelope as well as general capability, with a purpose-built cyber model alongside protected aliases.',evidence:'Current OpenAI model catalog lists GPT‑5.6 Cyber as an advanced cybersecurity model for authorized research and testing.',source:U.models},
+ {id:'astra',name:'GPT‑6 Astra',date:'2026-09-03',dateLabel:'Sep 2026',lane:'agent',major:true,current:true,context:1050000,maxOut:128000,params:'not disclosed',price:'$10 / $50 per MTok',variants:['GPT‑6 Astra','GPT‑6 Astra Pro (ChatGPT higher-compute tier)'],caps:{ctx:true,aligned:true,dialogue:true,vision:true,reasoning:true,tools:true,web:true,computer:true},role:'New-generation end-to-end work model',change:'Moves the public frontier again toward end-to-end computer work, browsing, coding, document creation and very high test-time reasoning effort inside one model line.',evidence:'Official API: 1.05M context, 128K output, reasoning low→max. Launch positions Astra as OpenAI’s most capable model for complex end-to-end work.',source:U.astra}
+];
+const laneOrder=['foundation','aligned','multimodal','reasoning','agent','specialist','voice','open'];
+const laneName={foundation:'PRETRAIN / GENERAL',aligned:'ALIGN / DIALOGUE',multimodal:'MULTIMODAL GPT',reasoning:'REASONING',agent:'GENERAL AGENT',specialist:'SPECIALIST',voice:'VOICE / REALTIME',open:'OPEN WEIGHTS'};
+const capDefs=[
+ ['ctx','In-context'],['aligned','Preference aligned'],['dialogue','Dialogue'],['vision','Vision'],['audio','Native audio'],['reasoning','Deliberate reasoning'],['tools','Tools / functions'],['web','Web / research'],['computer','Computer action'],['open','Open weights'],['duplex','Full duplex']
+];
+
+const years=[2018,2019,2020,2021,2022,2023,2024,2025,2026];
+const shortLane={foundation:'General',aligned:'Aligned / chat',multimodal:'Multimodal',reasoning:'Reasoning',agent:'General agent',specialist:'Specialist',voice:'Voice',open:'Open weights'};
+const capShort={ctx:'In-context',aligned:'Aligned',dialogue:'Chat',vision:'Vision',audio:'Audio',reasoning:'Reasoning',tools:'Tools',web:'Web',computer:'Computer',open:'Open',duplex:'Duplex'};
+let state={filter:'all',q:'',pins:['gpt1','gpt4o','o1','astra']};
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+function fmtTokens(n){if(!n)return '—';if(n>=1000000)return (n/1000000).toFixed(n%1000000?2:0).replace(/0+$/,'').replace(/\.$/,'')+'M';if(n>=1000)return Math.round(n/1000)+'K';return String(n)}
+function modelYear(m){return Number(m.date.slice(0,4))}
+function modelMonth(m){return new Date(m.date+'T00:00:00Z').toLocaleString('en',{month:'short',timeZone:'UTC'})}
+function matches(m){
+  const hay=[m.name,m.dateLabel,m.role,m.change,...m.variants].join(' ').toLowerCase();
+  if(state.q && !hay.includes(state.q.toLowerCase())) return false;
+  return state.filter==='all'||(state.filter==='major'&&m.major)||(state.filter==='current'&&m.current);
+}
+function togglePin(id){
+  const i=state.pins.indexOf(id);
+  if(i>=0) state.pins.splice(i,1);
+  else { if(state.pins.length>=4) state.pins.shift(); state.pins.push(id); }
+  renderLineage();renderCompare();renderMatrix();
+}
+function renderLineage(){
+  const grid=$('#lineageGrid');
+  let out='';
+  years.forEach(year=>{
+    const ms=models.filter(m=>modelYear(m)===year&&matches(m)).sort((a,b)=>a.date.localeCompare(b.date));
+    out+=`<div class="year-column"><div class="year-head">${year}</div>${ms.length?ms.map(m=>{
+      const pinned=state.pins.includes(m.id);
+      const extra=m.variants.length>1?`+${m.variants.length-1}`:'';
+      return `<button class="model-chip ${m.major?'major':''} ${m.current?'current':''} ${pinned?'pinned':''}" data-id="${m.id}" aria-pressed="${pinned}" title="${m.role}: ${m.change.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}">
+        <span class="dot"></span><span class="model-name">${m.name}</span>
+        <span class="model-meta"><span>${modelMonth(m)} · ${shortLane[m.lane]}</span><span class="model-variants">${extra}</span></span>
+      </button>`;
+    }).join(''):'<span class="empty">—</span>'}</div>`;
+  });
+  grid.innerHTML=out;
+  $$('.model-chip').forEach(b=>b.addEventListener('click',()=>togglePin(b.dataset.id)));
+  const visible=models.filter(matches).length;
+  $('#visibleCount').textContent=`${visible} ${visible===1?'family':'families'}`;
+}
+function caps(m){
+  const marked=capDefs.filter(([k])=>m.caps[k]);
+  if(!marked.length)return '—';
+  return `<div class="cap-list">${marked.map(([k])=>`<span class="cap-tag">${capShort[k]}${m.caps[k]==='partial'?' ○':''}</span>`).join('')}</div>`;
+}
+function renderCompare(){
+  const chosen=state.pins.map(id=>models.find(m=>m.id===id)).filter(Boolean);
+  const t=$('#compareTable');
+  $('#compareHelp').textContent=chosen.length?`${chosen.length} selected · click a selected model again to remove it.`:'Click a model above to compare it.';
+  if(!chosen.length){t.innerHTML='<tr><th></th><td>Nothing selected.</td></tr>';return}
+  const head=`<tr><th></th>${chosen.map(m=>`<th><div class="model-head"><button class="unpin" data-id="${m.id}" aria-label="Remove ${m.name}">×</button><strong>${m.name}</strong><div class="meta">${m.dateLabel} · ${m.role}</div></div></th>`).join('')}</tr>`;
+  const row=(label,fn)=>`<tr><th>${label}</th>${chosen.map(m=>`<td>${fn(m)}</td>`).join('')}</tr>`;
+  t.innerHTML=head+
+    row('Context',m=>m.context?`${fmtTokens(m.context)} tokens`:'—')+
+    row('Published size',m=>m.params||'—')+
+    row('Capabilities',m=>caps(m))+
+    row('API price',m=>m.price||'—')+
+    row('Why it mattered',m=>`<div class="story">${m.change}</div>`)+
+    row('Primary source',m=>`<a class="source-link" href="${m.source}" target="_blank" rel="noreferrer">Open source ↗</a>`);
+  $$('.unpin').forEach(b=>b.addEventListener('click',()=>togglePin(b.dataset.id)));
+}
+function renderMatrix(){
+  const shown=models.filter(matches);
+  const t=$('#matrix');
+  const header=`<thead><tr><th>Model</th>${capDefs.map(([k])=>`<th title="${capShort[k]}">${capShort[k]}</th>`).join('')}<th>Context</th></tr></thead>`;
+  const rows=shown.map(m=>`<tr data-id="${m.id}"><th tabindex="0">${m.name}<span class="date">${m.dateLabel}</span></th>${capDefs.map(([k])=>{const v=m.caps[k];return `<td title="${capShort[k]}: ${v===true?'documented':v==='partial'?'partial / staged':'not marked'}">${v===true?'<span class="mark-full">●</span>':v==='partial'?'<span class="mark-partial">○</span>':''}</td>`}).join('')}<td class="mono">${m.context?fmtTokens(m.context):'—'}</td></tr>`).join('');
+  t.innerHTML=header+`<tbody>${rows}</tbody>`;
+  $$('#matrix tbody tr').forEach(r=>{
+    const act=()=>{togglePin(r.dataset.id);$('#compareSection').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});};
+    r.addEventListener('dblclick',act);
+    r.querySelector('th').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();act();}});
+  });
+}
+$$('.filter-btn').forEach(b=>b.addEventListener('click',()=>{
+  state.filter=b.dataset.filter;
+  $$('.filter-btn').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  renderLineage();renderMatrix();
+}));
+$('#search').addEventListener('input',e=>{state.q=e.target.value.trim();renderLineage();renderMatrix();});
+$('#resetPins').addEventListener('click',()=>{state.pins=['gpt1','gpt4o','o1','astra'];renderLineage();renderCompare();renderMatrix();});
+renderLineage();renderCompare();renderMatrix();
+</script>
+</body>
+</html>
